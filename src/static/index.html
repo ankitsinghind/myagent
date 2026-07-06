@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Email Security Assistant</title>
+    <!-- Clean Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-panel: rgba(17, 24, 39, 0.85);
+            --bg-surface-hover: rgba(31, 41, 55, 0.6);
+            
+            --accent-cyan: #06b6d4;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            
+            --border-primary: rgba(255, 255, 255, 0.06);
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --text-muted: #4b5563;
+            
+            --glow-cyan: 0 0 15px rgba(6, 182, 212, 0.2);
+            --panel-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 40%);
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 99px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-cyan);
+        }
+
+        /* Top Header */
+        header {
+            background: rgba(9, 13, 22, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .pulsing-radar {
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: var(--glow-cyan);
+            position: relative;
+        }
+
+        .pulsing-radar::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 2px solid var(--accent-cyan);
+            border-radius: 50%;
+            animation: radarGlow 2.5s infinite linear;
+            opacity: 0;
+        }
+
+        @keyframes radarGlow {
+            0% { transform: scale(0.6); opacity: 0.8; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        h1 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-live {
+            color: var(--accent-green);
+            background-color: rgba(16, 185, 129, 0.05);
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .warning-banner {
+            background: linear-gradient(to right, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.02));
+            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+            color: var(--accent-yellow);
+            text-align: center;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Wizard Steps Indicator */
+        .wizard-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(9, 13, 22, 0.4);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 0.75rem 2rem;
+            gap: 1.25rem;
+        }
+
+        .wizard-step {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        .wizard-step.active {
+            color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.05);
+            border: 1px solid rgba(6, 182, 212, 0.15);
+        }
+
+        .wizard-step.completed {
+            color: var(--accent-green);
+        }
+
+        .wizard-step .circle {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1.5px solid var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+        }
+
+        .wizard-step.active .circle {
+            border-color: var(--accent-cyan);
+            background: var(--accent-cyan);
+            color: #090d16;
+        }
+
+        .wizard-step.completed .circle {
+            border-color: var(--accent-green);
+            background: var(--accent-green);
+            color: #090d16;
+        }
+
+        .wizard-arrow {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Layout Container */
+        .container {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .step-view {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .step-view.active {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Panel Cards */
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-primary);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--panel-shadow);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .panel-header {
+            background: rgba(255, 255, 255, 0.01);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-body {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+        }
+
+        /* Presets Grid */
+        .presets-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.65rem;
+        }
+
+        .preset-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            font-weight: 500;
+            padding: 0.55rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Inputs & Textareas */
+        textarea {
+            width: 100%;
+            height: 240px;
+            background: rgba(3, 7, 18, 0.4);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            padding: 1rem;
+            resize: none;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        /* Buttons */
+        .action-button {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-blue) 100%);
+            border: none;
+            border-radius: 10px;
+            color: #090d16;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.82rem;
+            padding: 0.85rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .action-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(6, 182, 212, 0.25);
+        }
+
+        .action-button:disabled {
+            background: rgba(255,255,255,0.03) !important;
+            color: var(--text-muted) !important;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Telemetry step elements */
+        .console-box {
+            background: rgba(3, 7, 18, 0.55);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            padding: 1.1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            height: 320px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+        }
+
+        .console-line {
+            line-height: 1.55;
+            animation: logFadeIn 0.25s ease;
+            border-left: 2px solid transparent;
+            padding-left: 0.65rem;
+        }
+
+        @keyframes logFadeIn {
+            from { opacity: 0; transform: translateY(2px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .line-commander { border-left-color: var(--accent-cyan); color: var(--accent-cyan); }
+        .line-forensics { border-left-color: var(--accent-green); color: #82e0aa; }
+        .line-intel { border-left-color: var(--accent-yellow); color: #f7dc6f; }
+        .line-sandbox { border-left-color: var(--accent-red); color: #f1948a; }
+        .line-mitigation { border-left-color: var(--accent-purple); color: #d7bde2; }
+        .line-system { border-left-color: var(--text-muted); color: var(--text-secondary); }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.65rem;
+        }
+
+        .telemetry-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .telemetry-val {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 0.15rem;
+        }
+
+        .telemetry-lbl {
+            font-size: 0.62rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Step 3 layout: Playbook & containment */
+        .containment-layout {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 1.25rem;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .containment-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .markdown-wrapper {
+            background: rgba(3, 7, 18, 0.3);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            padding: 1.25rem;
+            height: 460px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+
+        /* Markdown Styles */
+        .markdown-wrapper h1, .markdown-wrapper h2, .markdown-wrapper h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .markdown-wrapper h1 { font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.25rem; }
+        .markdown-wrapper h2 { font-size: 0.95rem; }
+        .markdown-wrapper h3 { font-size: 0.85rem; }
+        .markdown-wrapper ul, .markdown-wrapper ol {
+            padding-left: 1.1rem;
+            margin-bottom: 0.65rem;
+        }
+        .markdown-wrapper li {
+            margin-bottom: 0.2rem;
+        }
+        .markdown-wrapper blockquote {
+            border-left: 3px solid var(--accent-yellow);
+            background: rgba(245, 158, 11, 0.03);
+            padding: 0.65rem 0.85rem;
+            margin: 0.75rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .markdown-wrapper table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.75rem 0;
+            font-size: 0.75rem;
+        }
+        .markdown-wrapper th, .markdown-wrapper td {
+            border: 1px solid var(--border-primary);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        .markdown-wrapper th {
+            background-color: rgba(31, 41, 55, 0.5);
+            font-weight: 600;
+        }
+        .markdown-wrapper td {
+            background-color: rgba(31, 41, 55, 0.15);
+        }
+
+        /* Containment controls */
+        .mitigation-deck {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            padding: 0.75rem 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .deck-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .deck-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .badge {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-recommended { background-color: rgba(245, 158, 11, 0.08); border: 1px solid var(--accent-yellow); color: var(--accent-yellow); }
+        .badge-active { background-color: rgba(16, 185, 129, 0.08); border: 1px solid var(--accent-green); color: var(--accent-green); }
+        .badge-inactive { background-color: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); color: var(--text-muted); }
+
+        .deck-desc {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .deck-action-btn {
+            border-radius: 6px;
+            padding: 0.4rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            color: var(--accent-cyan);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .deck-action-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-blue) 100%);
+            color: #090d16;
+            border-color: transparent;
+        }
+
+        /* Liaison Chat */
+        .liaison-room {
+            border: 1px solid var(--border-primary);
+            border-radius: 10px;
+            padding: 0.75rem;
+            background: rgba(3, 7, 18, 0.3);
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .liaison-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .bubble {
+            padding: 0.55rem 0.75rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            line-height: 1.45;
+            max-width: 85%;
+            animation: bubbleAnim 0.2s ease;
+        }
+
+        @keyframes bubbleAnim {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bubble-liaison {
+            background: rgba(6, 182, 212, 0.02);
+            border: 1px solid rgba(6, 182, 212, 0.12);
+            color: var(--text-primary);
+            align-self: flex-start;
+            border-radius: 10px 10px 10px 0;
+        }
+
+        .bubble-analyst {
+            background: var(--bg-surface-hover);
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            align-self: flex-end;
+            border-radius: 10px 10px 0 10px;
+        }
+
+        .liaison-input-row {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .liaison-input-row input {
+            flex-grow: 1;
+            background: rgba(3, 7, 18, 0.5);
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            outline: none;
+        }
+
+        .liaison-input-row input:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .liaison-input-row button {
+            padding: 0.5rem 0.85rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-blue) 100%);
+            color: #090d16;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="warning-banner" id="key-warning">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></svg>
+        Warning: Gemini API Key is missing or invalid. Running in Local Offline Mode.
+    </div>
+
+    <header>
+        <div class="brand-section">
+            <div class="pulsing-radar"></div>
+            <h1>AI Email Security Assistant</h1>
+        </div>
+        <div class="top-nav-badges">
+            <div class="status-badge" id="mode-indicator" style="display: none; border-color: rgba(239, 68, 68, 0.2); color: var(--accent-red); background-color: rgba(239, 68, 68, 0.02);">
+                Write-Access Active
+            </div>
+            <div class="status-badge badge-live" id="system-status">
+                Ready to Scan
+            </div>
+        </div>
+    </header>
+
+    <!-- Simplified Wizard Steps progress indicator -->
+    <div class="wizard-bar">
+        <div class="wizard-step active" id="step-btn-1">
+            <div class="circle">1</div>
+            Paste Email
+        </div>
+        <div class="wizard-arrow">➔</div>
+        <div class="wizard-step" id="step-btn-2">
+            <div class="circle">2</div>
+            Scanning Email
+        </div>
+        <div class="wizard-arrow">➔</div>
+        <div class="wizard-step" id="step-btn-3">
+            <div class="circle">3</div>
+            Security Report
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- STEP 1: Paste Email -->
+        <section class="step-view active" id="view-ingestion">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        Input Email Content
+                    </span>
+                </div>
+                <div class="panel-body">
+                    <div class="presets-row">
+                        <div class="preset-card" onclick="loadSample(1)">Suspicious Login Alert</div>
+                        <div class="preset-card" onclick="loadSample(2)">Job Offer Scam</div>
+                        <div class="preset-card" onclick="loadSample(3)">Safe PayPal Email</div>
+                    </div>
+                    <textarea id="incident-text" placeholder="Paste the text of the suspicious email here..."></textarea>
+                    <button class="action-button" onclick="startAnalysis()">
+                        Scan for Threats
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2: Scanning Progress -->
+        <section class="step-view" id="view-telemetry">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        Scanning Progress & Details
+                    </span>
+                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent-cyan);" id="timer">00:00</span>
+                </div>
+                <div class="panel-body">
+                    <div class="console-box" id="log-output"></div>
+                    <div class="telemetry-grid">
+                        <div class="telemetry-card">
+                            <div class="telemetry-val" id="metrics-severity">-</div>
+                            <div class="telemetry-lbl">Risk Level</div>
+                        </div>
+                        <div class="telemetry-card">
+                            <div class="telemetry-val" id="metrics-cost">$0.00</div>
+                            <div class="telemetry-lbl">Cost</div>
+                        </div>
+                        <div class="telemetry-card">
+                            <div class="telemetry-val" id="metrics-duration">0.0s</div>
+                            <div class="telemetry-lbl">Scan Duration</div>
+                        </div>
+                    </div>
+                    <button class="action-button" id="btn-next-to-playbook" disabled onclick="navigateToStep(3)">
+                        View Security Report
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 3: Security Report & Containment -->
+        <section class="step-view" id="view-containment">
+            <div class="containment-layout">
+                <!-- Left: Playbook Report -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title">
+                            Security Report & Playbook
+                        </span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="markdown-wrapper" id="report-output"></div>
+                        <button class="preset-btn" onclick="navigateToStep(1)" style="border-radius: 8px; padding: 0.65rem 1rem; font-weight: 600; width: fit-content;">
+                            Scan New Email
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Safe Action Controls & Chat -->
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    <!-- Action controls -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title">
+                                Stop the Threat (Mitigation)
+                            </span>
+                        </div>
+                        <div class="panel-body" style="gap: 0.75rem;">
+                            <div class="mitigation-deck" id="card-fw">
+                                <div class="deck-header">
+                                    <span class="deck-title">Block Malicious IP</span>
+                                    <span class="badge badge-inactive" id="status-fw">Inactive</span>
+                                </div>
+                                <div class="deck-desc" id="desc-fw">No dangerous IP addresses detected.</div>
+                                <button class="deck-action-btn" id="btn-fw" disabled>Deploy Block</button>
+                            </div>
+
+                            <div class="mitigation-deck" id="card-dns">
+                                <div class="deck-header">
+                                    <span class="deck-title">Block Scam Website</span>
+                                    <span class="badge badge-inactive" id="status-dns">Inactive</span>
+                                </div>
+                                <div class="deck-desc" id="desc-dns">No dangerous websites detected.</div>
+                                <button class="deck-action-btn" id="btn-dns" disabled>Block Domain</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liaison Chat -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="panel-title">
+                                Chat with Security Assistant
+                            </span>
+                        </div>
+                        <div class="panel-body" style="padding: 0.85rem;">
+                            <div class="liaison-room">
+                                <div class="liaison-history" id="chat-messages">
+                                    <div class="bubble bubble-liaison">Hello! Ask me any questions about the security scan results.</div>
+                                </div>
+                                <div class="liaison-input-row">
+                                    <input type="text" id="chat-input" placeholder="Ask (e.g. 'Is this safe?')" disabled>
+                                    <button id="chat-send" onclick="sendChat()" disabled>Ask</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let chatHistory = [];
+        let incidentContext = "";
+        let timerInterval = null;
+        let startTime = null;
+        let currentStep = 1;
+
+        async function checkConfig() {
+            try {
+                const configRes = await fetch("/api/config");
+                const config = await configRes.json();
+                if (!config.api_key_configured) {
+                    document.getElementById("key-warning").style.display = "flex";
+                }
+
+                const res = await fetch("/api/status");
+                const data = await res.json();
+                if (data.local_system_mode) {
+                    document.getElementById("mode-indicator").style.display = "block";
+                }
+                updateContainmentUI(data.actions);
+            } catch (e) {
+                console.error("Config check failed", e);
+            }
+        }
+
+        window.onload = checkConfig;
+
+        function navigateToStep(step) {
+            currentStep = step;
+            
+            // Toggle step views
+            document.querySelectorAll(".step-view").forEach(v => v.classList.remove("active"));
+            if (step === 1) document.getElementById("view-ingestion").classList.add("active");
+            else if (step === 2) document.getElementById("view-telemetry").classList.add("active");
+            else if (step === 3) document.getElementById("view-containment").classList.add("active");
+
+            // Toggle step buttons in header wizard bar
+            for (let i = 1; i <= 3; i++) {
+                const btn = document.getElementById(`step-btn-${i}`);
+                btn.classList.remove("active", "completed");
+                if (i === step) {
+                    btn.classList.add("active");
+                } else if (i < step) {
+                    btn.classList.add("completed");
+                }
+            }
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+            const secs = String(elapsed % 60).padStart(2, '0');
+            document.getElementById("timer").innerText = `${mins}:${secs}`;
+        }
+
+        function loadSample(id) {
+            const val1 = `From: Security Operations Center <soc@enterprise.com>\nTo: alert-logs@enterprise.com\nSubject: Critical Threat Alert: Obfuscated Connection from 198.51.100.42\n\nWe detected a connection from 198.51.100.42 pointing to local web server host. This IP matches known Exit Nodes.`;
+            const val2 = `From: Wipro HR Recruitment Team <hr.recruitment@wipro-careers-india.com>\nTo: ankit.singh@gmail.com\nSubject: Congratulations! You Have Been Selected for Wipro Internship 2024\n\nDear Ankit,\nTo confirm your seat, download hxxps://wipro-intern-offers[.]com/download/offer\nPay a deposit of 2,500 INR to UPI: wipro.recruitment.2024@googlepay`;
+            const val3 = `Subject: Important Information About Your PayPal Account\nFrom: service@paypal.com\n\nDear Ankit,\nWe are writing to let you know about recent updates to your PayPal account. At this time, no action is required. You can always check your account status by logging in directly at www.paypal.com.`;
+            
+            if (id === 1) document.getElementById("incident-text").value = val1;
+            else if (id === 2) document.getElementById("incident-text").value = val2;
+            else document.getElementById("incident-text").value = val3;
+        }
+
+        function getAgentClass(agent) {
+            if (!agent) return "line-system";
+            if (agent.includes("commander") || agent.includes("incident") || agent.includes("fraud")) return "line-commander";
+            if (agent.includes("forensics") || agent.includes("extraction")) return "line-forensics";
+            if (agent.includes("intel")) return "line-intel";
+            if (agent.includes("sandbox")) return "line-sandbox";
+            if (agent.includes("mitigation") || agent.includes("report")) return "line-mitigation";
+            return "line-system";
+        }
+
+        function appendLog(message, agent) {
+            const logContainer = document.getElementById("log-output");
+            const entry = document.createElement("div");
+            entry.className = `console-line ${getAgentClass(agent)}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerText = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        async function startAnalysis() {
+            const text = document.getElementById("incident-text").value.trim();
+            if (!text) {
+                alert("Please paste an email first.");
+                return;
+            }
+
+            // Move to Step 2
+            navigateToStep(2);
+
+            // Reset UI
+            document.getElementById("btn-next-to-playbook").disabled = true;
+            document.getElementById("system-status").innerText = "Scanning email...";
+            document.getElementById("system-status").style.color = "var(--accent-yellow)";
+            document.getElementById("system-status").style.borderColor = "rgba(245, 158, 11, 0.3)";
+            document.getElementById("log-output").innerHTML = "";
+            
+            // Start Timer
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+
+            appendLog("Starting safety checks on email...", "system");
+
+            try {
+                const response = await fetch("/api/analyze", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value);
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            const rawJson = line.substring(6).trim();
+                            if (!rawJson) continue;
+                            const payload = JSON.parse(rawJson);
+                            handleEvent(payload);
+                        }
+                    }
+                }
+            } catch (e) {
+                appendLog(`Error scanning email: ${e.message}`, "system");
+            } finally {
+                clearInterval(timerInterval);
+            }
+        }
+
+        function handleEvent(data) {
+            const event = data.event;
+            
+            if (event === "agent_start" || event === "agent_log" || event === "agent_complete") {
+                // Simplify log output jargon
+                let msg = data.message;
+                msg = msg.replace("Kicking off multi-agent Incident Response pipeline", "Initializing security checkers");
+                msg = msg.replace("Cyrillic homoglyph characters normalized", "Fixed letter encoding changes");
+                msg = msg.replace("Indicators of Compromise (IOCs)", "suspicious links/IPs");
+                msg = msg.replace("SentinelThreatIntel MCP Server", "threat intelligence base");
+                msg = msg.replace("threat severity calculated", "overall risk calculated");
+                
+                appendLog(msg, data.agent);
+            } else if (event === "complete") {
+                appendLog("Security scan finished.", "system");
+                
+                // Finalize Status
+                document.getElementById("system-status").innerText = "Scan Completed";
+                document.getElementById("system-status").style.borderColor = "rgba(16, 185, 129, 0.3)";
+                document.getElementById("system-status").style.color = "var(--accent-green)";
+                
+                // Populate metrics
+                document.getElementById("metrics-severity").innerText = data.severity;
+                document.getElementById("metrics-severity").style.color = 
+                    data.severity === "CRITICAL" ? "var(--accent-red)" : 
+                    data.severity === "SUSPICIOUS" ? "var(--accent-yellow)" : "var(--accent-green)";
+                
+                const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+                document.getElementById("metrics-duration").innerText = `${duration}s`;
+                
+                let costSum = 0;
+                if (data.trace_metrics) {
+                    Object.values(data.trace_metrics).forEach(m => costSum += (m.cost || 0));
+                }
+                document.getElementById("metrics-cost").innerText = `$${costSum.toFixed(6)}`;
+
+                // Format and show report
+                incidentContext = data.report;
+                document.getElementById("report-output").innerHTML = marked.parse(data.report);
+
+                // Update containment controls
+                updateContainmentUI(data.actions);
+
+                // Enable liaison chat
+                document.getElementById("chat-input").disabled = false;
+                document.getElementById("chat-send").disabled = false;
+
+                // Enable and auto-transition to next step
+                document.getElementById("btn-next-to-playbook").disabled = false;
+                setTimeout(() => navigateToStep(3), 1500); 
+            }
+        }
+
+        function updateContainmentUI(actions) {
+            const fw = actions.firewall;
+            if (fw) {
+                document.getElementById("desc-fw").innerText = fw.desc;
+                const badge = document.getElementById("status-fw");
+                badge.innerText = fw.status === "BLOCKED" ? "Blocked" : (fw.status === "INACTIVE" ? "Inactive" : fw.status);
+                badge.className = `badge ${fw.status === 'RECOMMENDED' ? 'badge-recommended' : 'badge-active'}`;
+                
+                const btn = document.getElementById("btn-fw");
+                if (fw.status === "RECOMMENDED" || fw.status === "MONITOR") {
+                    btn.disabled = false;
+                    const ipMatch = fw.desc.match(/(?:[0-9]{1,3}\.){3}[0-9]{1,3}/);
+                    const ip = ipMatch ? ipMatch[0] : "";
+                    btn.onclick = () => deployMitigation("ip", ip || "simulated_ip");
+                    btn.innerText = "Deploy Block";
+                } else if (fw.status === "INACTIVE") {
+                    btn.disabled = true;
+                    btn.innerText = "No action needed";
+                } else {
+                    btn.disabled = true;
+                    btn.innerText = "Blocked";
+                }
+            }
+
+            const dns = actions.dns;
+            if (dns) {
+                document.getElementById("desc-dns").innerText = dns.desc;
+                const badge = document.getElementById("status-dns");
+                badge.innerText = dns.status === "SINKHOLED" ? "Blocked" : (dns.status === "INACTIVE" ? "Inactive" : dns.status);
+                badge.className = `badge ${dns.status === 'RECOMMENDED' ? 'badge-recommended' : 'badge-active'}`;
+
+                const btn = document.getElementById("btn-dns");
+                if (dns.status === "RECOMMENDED" || dns.status === "WATCHED") {
+                    btn.disabled = false;
+                    const domainMatch = dns.desc.match(/([a-zA-Z0-9-]+\.[a-zA-Z]{2,})/);
+                    const domain = domainMatch ? domainMatch[0] : "";
+                    btn.onclick = () => deployMitigation("domain", domain || "simulated_domain");
+                    btn.innerText = "Block Domain";
+                } else if (dns.status === "INACTIVE") {
+                    btn.disabled = true;
+                    btn.innerText = "No action needed";
+                } else {
+                    btn.disabled = true;
+                    btn.innerText = "Blocked";
+                }
+            }
+        }
+
+        async function deployMitigation(type, value) {
+            appendLog(`Deploying block for ${value}...`, "system");
+            try {
+                const res = await fetch("/api/block", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ type, value })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    appendLog(`Successfully blocked connections to ${value}.`, "system");
+                    const statusRes = await fetch("/api/status");
+                    const statusData = await statusRes.json();
+                    updateContainmentUI(statusData.actions);
+                } else {
+                    alert("Failed: " + data.detail);
+                }
+            } catch (e) {
+                alert("Failed: " + e.message);
+            }
+        }
+
+        async function sendChat() {
+            const input = document.getElementById("chat-input");
+            const q = input.value.trim();
+            if (!q) return;
+
+            input.value = "";
+            input.disabled = true;
+
+            const messages = document.getElementById("chat-messages");
+            const uBubble = document.createElement("div");
+            uBubble.className = "bubble bubble-analyst";
+            uBubble.innerText = q;
+            messages.appendChild(uBubble);
+            messages.scrollTop = messages.scrollHeight;
+
+            try {
+                const res = await fetch("/api/ask", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        question: q,
+                        history: chatHistory,
+                        context: incidentContext
+                    })
+                });
+                const data = await res.json();
+                
+                const lBubble = document.createElement("div");
+                lBubble.className = "bubble bubble-liaison";
+                lBubble.innerText = data.text;
+                messages.appendChild(lBubble);
+                messages.scrollTop = messages.scrollHeight;
+
+                chatHistory.push({ role: "user", text: q });
+                chatHistory.push({ role: "model", text: data.text });
+            } catch (e) {
+                console.error(e);
+            } finally {
+                input.disabled = false;
+                input.focus();
+            }
+        }
+    </script>
+</body>
+</html>

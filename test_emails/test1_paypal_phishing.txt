@@ -1,0 +1,15 @@
+From: PayPal Security Team <security@paypa1-alerts.com>
+To: you@yourcompany.com
+Subject: Urgent: Your PayPal Account Has Been Limited
+
+Dear Customer,
+
+We have detected unusual activity on your PayPal account originating from IP address 198.51.100.42 located in Romania. Your account access has been temporarily limited.
+
+To restore full access, please verify your identity within 24 hours by clicking the link below:
+
+http://verify-paypal-login.com/secure/confirm?token=abc123
+
+Failure to verify will result in permanent account suspension. This is your final notice.
+
+PayPal Security Department

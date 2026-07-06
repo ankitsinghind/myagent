@@ -1,0 +1,18 @@
+From: Sarah Jenkins <s.jenkins@acmecorp.com>
+To: dev-team@acmecorp.com
+Subject: Q3 Engineering Roadmap — Review Meeting Thursday
+
+Hi team,
+
+I've finalized the Q3 engineering roadmap document and shared it to your Google Drive. Please review it before our Thursday 10am meeting.
+
+Key items on the agenda:
+1. Microservices migration timeline
+2. Database sharding strategy
+3. CI/CD pipeline improvements
+
+No urgent action needed — just a quick read before Thursday would be great.
+
+Thanks,
+Sarah Jenkins
+Engineering Lead, ACME Corp

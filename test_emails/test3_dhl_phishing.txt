@@ -1,0 +1,16 @@
+From: DHL Express Tracking <noreply@dhl-delivery-update.net>
+To: recipient@company.com
+Subject: [ACTION REQUIRED] Your Package #DHL8842019 — Delivery Failed
+
+Dear Customer,
+
+We attempted to deliver your package (Tracking ID: DHL8842019) on 23rd June 2026 but were unable to complete delivery due to an incorrect address.
+
+To reschedule your delivery and avoid return to sender, please update your address details and pay a small redelivery fee of $1.99 via the secure link below:
+
+hxxps://dhl-redelivery-portal[.]com/auth/reschedule?id=DHL8842019
+
+Your package will be held for 48 hours before being returned.
+
+DHL Express Customer Support
+Helpdesk: +1-800-DHL-HELP

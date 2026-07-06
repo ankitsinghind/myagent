@@ -1,0 +1,29 @@
+# API Keys and Secrets
+.env
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE files
+.vscode/
+.idea/
+.gemini/
+
+# Node environment task dependencies
+node_modules/
+npm-debug.log*
+
+# System files
+.DS_Store
+Thumbs.db

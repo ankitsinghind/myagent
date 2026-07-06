@@ -1,0 +1,11 @@
+{
+  "name": "sentinelsoc",
+  "version": "1.0.0",
+  "description": "AI Email Security Assistant Multi-Agent Console",
+  "scripts": {
+    "start": "python src/web_server.py",
+    "dev": "python src/web_server.py",
+    "test": "python -m unittest discover tests",
+    "evaluate": "python tests/evaluate.py"
+  }
+}
