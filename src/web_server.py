@@ -173,7 +173,8 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="SentinelSOC Web Console Application")
-    parser.add_argument("--host", default=os.getenv("HOST", "127.0.0.1"), help="Host address to bind to")
+    default_host = "0.0.0.0" if "RENDER" in os.environ else "127.0.0.1"
+    parser.add_argument("--host", default=os.getenv("HOST", default_host), help="Host address to bind to")
     parser.add_argument("--port", type=int, default=int(os.getenv("PORT", 8000)), help="Port to run the server on")
     parser.add_argument("--local-system", action="store_true", help="Opt-in to modify local Windows Firewall and hosts file")
     

@@ -12,6 +12,17 @@ When a security threat is detected, it guides the user through interactive conta
 
 ---
 
+## 🛠️ Built With
+
+*   **[Google ADK](https://github.com/google/adk)**: Google's multi-agent orchestrator framework.
+*   **[Gemini 2.5 Flash API](https://ai.google.dev/)**: Powering core reasoning, classifications, and playbook drafting.
+*   **[Model Context Protocol (MCP)](https://modelcontextprotocol.io/)**: Gateway bridging AI agents with local lookup tools.
+*   **[FastAPI](https://fastapi.tiangolo.com/)**: Exposing real-time streaming endpoints.
+*   **[Starlette SSE](https://github.com/sysid/sse-starlette)**: Server-Sent Events (SSE) streaming logs dynamically to the browser.
+*   **[BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/)**: Driving URL text parsing inside the sandbox agent.
+
+---
+
 ## 🎯 Key Challenges Solved
 
 1. **Obfuscation Detection:** Programmatically identifies bypass attempts like **zero-width space characters** and **Cyrillic homoglyph characters** (identical-looking letters from different alphabets used to evade standard filters).
