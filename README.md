@@ -89,6 +89,18 @@ python src/web_server.py
 ```
 Open [http://localhost:8000](http://localhost:8000) in your browser to access the console.
 
+### 5. Running the Email Watcher (IMAP Ingestion)
+To automatically scan emails directly from your inbox:
+1. Configure IMAP settings in `.env`.
+2. Run manual scan (scans the latest unseen email and exits):
+   ```bash
+   python src/email_watcher.py
+   ```
+3. Or run continuous watcher (polls for new unread mail in background):
+   ```bash
+   python src/email_watcher.py --watch --interval 15
+   ```
+
 ---
 
 ## 🛠️ Usage Walks
@@ -124,6 +136,7 @@ myagent/
 │   ├── main.py             # CLI runner & system containment adapters
 │   ├── agents.py           # ADK agents definition & streaming pipeline
 │   ├── mcp_server.py       # FastMCP threat intelligence tool adapters
+│   ├── email_watcher.py    # IMAP automated & manual email ingestion tool
 │   ├── web_server.py       # FastAPI web server driving the SSE stream
 │   ├── static/
 │   │   └── index.html      # Glassmorphic multi-step wizard dashboard

@@ -2,8 +2,16 @@ import json
 import sys
 import requests
 from datetime import datetime
+import os
 from mcp.server.fastmcp import FastMCP
 from src.utils.security import detect_mixed_scripts, is_punycode_or_idn
+
+# Ensure root folder is in path for config import
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+try:
+    from config import _VALID_TLDS
+except ImportError:
+    _VALID_TLDS = set()
 
 # Initialize FastMCP Server
 mcp = FastMCP("SentinelThreatIntel")
@@ -214,21 +222,46 @@ def get_ip_reputation(ip: str) -> str:
         "isp": "unknown"
     })
 
+def extract_root_domain(domain: str) -> str:
+    """
+    Extracts the registered root domain (e.g. mongodb.com from team.mongodb.com).
+    Keeps public multi-tenant suffixes like .github.io un-stripped.
+    """
+    clean_domain = domain.lower().replace("https://", "").replace("http://", "").split("/")[0]
+    if clean_domain.startswith("www."):
+        clean_domain = clean_domain[4:]
+        
+    parts = clean_domain.split(".")
+    if len(parts) <= 2:
+        return clean_domain
+        
+    # Check if the last two parts form a known public/multi-tenant suffix
+    public_suffixes = {"github.io", "herokuapp.com", "pages.dev", "onrender.com", "netlify.app", "vercel.app", "blogspot.com"}
+    two_part_suffix = ".".join(parts[-2:])
+    if len(parts) >= 3 and two_part_suffix in public_suffixes:
+        return ".".join(parts[-3:])
+        
+    return ".".join(parts[-2:])
+
 @mcp.tool()
 def get_domain_reputation(domain: str) -> str:
     """
     Checks the reputation of a domain name.
     Queries local overrides cache, then resolves dynamically via Registration Data Access Protocol (RDAP).
     """
-    clean_domain = domain.lower().replace("https://", "").replace("http://", "").split("/")[0]
-    if clean_domain.startswith("www."):
-        clean_domain = clean_domain[4:]
+    raw_clean = domain.lower().replace("https://", "").replace("http://", "").split("/")[0]
+    if raw_clean.startswith("www."):
+        raw_clean = raw_clean[4:]
         
-    sys.stderr.write(f"[MCP Tool] Querying domain reputation for: {clean_domain}\n")
+    clean_domain = extract_root_domain(raw_clean)
+    sys.stderr.write(f"[MCP Tool] Querying domain reputation for: {clean_domain} (raw: {raw_clean})\n")
     
     # 1. Local Cache Lookup
+    if raw_clean in DOMAIN_REPUTATION_DB:
+        sys.stderr.write(f"[MCP Cache Hit] Resolving domain details for raw: {raw_clean}\n")
+        return json.dumps(DOMAIN_REPUTATION_DB[raw_clean])
     if clean_domain in DOMAIN_REPUTATION_DB:
-        sys.stderr.write(f"[MCP Cache Hit] Resolving domain details for: {clean_domain}\n")
+        sys.stderr.write(f"[MCP Cache Hit] Resolving domain details for root: {clean_domain}\n")
         return json.dumps(DOMAIN_REPUTATION_DB[clean_domain])
         
     # 2. Live RDAP WHOIS Lookup
@@ -286,10 +319,10 @@ def get_domain_reputation(domain: str) -> str:
         sys.stderr.write(f"[MCP Warning] Live RDAP query failed for {clean_domain}: {e}\n")
         
     return json.dumps({
-        "status": "newly_registered / suspicious",
+        "status": "unknown",
         "age_days": 0,
         "registrar": "unknown / registrar hidden",
-        "flagged": True,
+        "flagged": False,
         "category": "unclassified domain"
     })
 
