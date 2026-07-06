@@ -867,7 +867,7 @@
 
         function loadSample(id) {
             const val1 = `From: Security Operations Center <soc@enterprise.com>\nTo: alert-logs@enterprise.com\nSubject: Critical Threat Alert: Obfuscated Connection from 198.51.100.42\n\nWe detected a connection from 198.51.100.42 pointing to local web server host. This IP matches known Exit Nodes.`;
-            const val2 = `From: Wipro HR Recruitment Team <hr.recruitment@wipro-careers-india.com>\nTo: ankit.singh@gmail.com\nSubject: Congratulations! You Have Been Selected for Wipro Internship 2024\n\nDear Ankit,\nTo confirm your seat, download hxxps://wipro-intern-offers[.]com/download/offer\nPay a deposit of 2,500 INR to UPI: wipro.recruitment.2024@googlepay`;
+            const val2 = `From: Wipro HR Recruitment Team <hr.recruitment@wipro-careers-india.com>\nTo: ankit.singh@gmail.com\nSubject: Congratulations! You Have Been Selected for Wipro Internship 2024\n\nDear Ankit,\nTo confirm your seat, download https://wipro-intern-offers.com/download/offer\nPay a deposit of 2,500 INR to UPI: wipro.recruitment.2024@googlepay`;
             const val3 = `Subject: Important Information About Your PayPal Account\nFrom: service@paypal.com\n\nDear Ankit,\nWe are writing to let you know about recent updates to your PayPal account. At this time, no action is required. You can always check your account status by logging in directly at www.paypal.com.`;
             
             if (id === 1) document.getElementById("incident-text").value = val1;
@@ -1001,9 +1001,8 @@
                 document.getElementById("chat-input").disabled = false;
                 document.getElementById("chat-send").disabled = false;
 
-                // Enable and auto-transition to next step
+                // Enable next step button (analyst transitions manually)
                 document.getElementById("btn-next-to-playbook").disabled = false;
-                setTimeout(() => navigateToStep(3), 1500); 
             }
         }
 
